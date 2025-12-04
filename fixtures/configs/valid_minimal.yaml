@@ -1,0 +1,37 @@
+# Configuration minimale valide pour tests
+version: "1.0"
+
+hierarchy:
+  levels:
+    - id: 0
+      name: platform
+      label: "Platform"
+    - id: 1
+      name: partner
+      label: "Partner"
+    - id: 2
+      name: organization
+      label: "Organization"
+    - id: 3
+      name: site
+      label: "Site"
+
+roles:
+  - id: platform_admin
+    level: 0
+    label: "Platform Administrator"
+    permissions:
+      - "platform:*"
+  
+  - id: site_operator
+    level: 3
+    label: "Site Operator"
+    permissions:
+      - "site:events:read"
+      - "site:events:write"
+
+modules:
+  - id: core
+    enabled: true
+  - id: audit
+    enabled: true
