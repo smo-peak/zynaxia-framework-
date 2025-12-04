@@ -1,0 +1,31 @@
+# Configuration invalide pour tests - violation RUN_021
+version: "1.0"
+
+hierarchy:
+  levels:
+    - id: 0
+      name: platform
+      label: "Platform"
+    - id: 1
+      name: partner
+      label: "Partner"
+    - id: 2
+      name: organization
+      label: "Organization"
+    - id: 3
+      name: site
+      label: "Site"
+
+roles:
+  - id: org_admin
+    level: 2
+    label: "Organization Administrator"
+    permissions:
+      - "organization:*"  # Violation RUN_021: wildcard interdit sauf level 0
+      - "organization:users:manage"
+
+modules:
+  - id: core
+    enabled: true
+  - id: audit
+    enabled: true
