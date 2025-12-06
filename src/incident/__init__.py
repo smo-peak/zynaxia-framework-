@@ -10,6 +10,9 @@ Module de gestion des incidents de sécurité avec:
 - Notification RSSI < 1h (INCID_006)
 - Révocation tokens/sessions (INCID_007)
 - Snapshot forensics (INCID_008)
+- Rapport post-incident < 72h RGPD (INCID_009)
+- Ancrage blockchain incidents (INCID_010)
+- Exercices trimestriels (INCID_011)
 
 Invariants couverts:
 - INCID_001: Détection intrusion = alerte immédiate multi-canal
@@ -20,6 +23,9 @@ Invariants couverts:
 - INCID_006: Breach = notification RSSI < 1 heure
 - INCID_007: Breach = révocation tous tokens/sessions du tenant
 - INCID_008: Breach = snapshot données pour forensics
+- INCID_009: Post-incident = rapport obligatoire < 72h (RGPD)
+- INCID_010: Incident ancré blockchain (preuve horodatée)
+- INCID_011: Procédure incident testée trimestriellement
 """
 
 from .interfaces import (
@@ -50,6 +56,15 @@ from .breach_handler import (
     ForensicCaptureError,
     BreachHandlerError,
 )
+from .post_incident import (
+    PostIncidentManager,
+    IncidentReport,
+    ComplianceStatus,
+    IncidentDrill,
+    ReportDeadlineExceededError,
+    DrillOverdueError,
+    PostIncidentError,
+)
 
 __all__ = [
     # Enums
@@ -62,6 +77,9 @@ __all__ = [
     "AccountLockStatus",
     "Breach",
     "BreachResponse",
+    "IncidentReport",
+    "ComplianceStatus",
+    "IncidentDrill",
     # Interfaces
     "IAlertDispatcher",
     "IIntrusionDetector",
@@ -73,6 +91,7 @@ __all__ = [
     "IntrusionDetector",
     "AccountLocker",
     "BreachHandler",
+    "PostIncidentManager",
     # Exceptions
     "IntrusionDetectorError",
     "AccountLockerError",
@@ -80,4 +99,7 @@ __all__ = [
     "RssiNotificationError",
     "ForensicCaptureError",
     "BreachHandlerError",
+    "ReportDeadlineExceededError",
+    "DrillOverdueError",
+    "PostIncidentError",
 ]
