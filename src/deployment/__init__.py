@@ -6,6 +6,7 @@ Module de déploiement sécurisé avec:
 - Gestion du registry privé (DEPL_003)
 - Scan CVE obligatoire (DEPL_004-005)
 - Orchestration zero-downtime (DEPL_010-014)
+- Déploiement de configuration sécurisé (DEPL_020-024)
 
 Invariants couverts:
 - DEPL_001: Images Docker signées obligatoirement
@@ -18,6 +19,11 @@ Invariants couverts:
 - DEPL_012: Rollback automatique < 60 secondes
 - DEPL_013: Zero-downtime obligatoire
 - DEPL_014: Déploiement progressif (1 nœud → validation → autres)
+- DEPL_020: Config validée par ConfigValidator AVANT déploiement
+- DEPL_021: Config signée (quorum atteint) AVANT déploiement
+- DEPL_022: Config ancrée blockchain AVANT déploiement
+- DEPL_023: Hash config vérifié sur chaque nœud après réception
+- DEPL_024: Ancienne config archivée (JAMAIS supprimée)
 """
 
 from .interfaces import (
@@ -43,6 +49,15 @@ from .deployment_orchestrator import (
     DeploymentState,
     NodeRole,
 )
+from .config_deployer import (
+    ConfigDeployer,
+    ConfigDeployerError,
+    ConfigNotValidError,
+    QuorumNotReachedError,
+    BlockchainAnchorError,
+    ConfigHashMismatchError,
+    ConfigVersion,
+)
 
 __all__ = [
     # Enums
@@ -56,6 +71,7 @@ __all__ = [
     "ImageVerificationResult",
     "DeploymentConfig",
     "DeploymentResult",
+    "ConfigVersion",
     # Interfaces
     "IImageVerifier",
     "IDeploymentOrchestrator",
@@ -63,8 +79,14 @@ __all__ = [
     # Implementations
     "ImageVerifier",
     "DeploymentOrchestrator",
+    "ConfigDeployer",
     # Exceptions
     "ImageVerifierError",
     "DeploymentError",
     "RollbackError",
+    "ConfigDeployerError",
+    "ConfigNotValidError",
+    "QuorumNotReachedError",
+    "BlockchainAnchorError",
+    "ConfigHashMismatchError",
 ]
