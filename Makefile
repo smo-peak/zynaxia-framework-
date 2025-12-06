@@ -238,8 +238,10 @@ clean:
 # PUSH ET SURVEILLANCE CI GITHUB
 # ============================================================================
 push:
-	@echo "$(BLUE)► Push et surveillance CI GitHub...$(NC)"
+	@echo "$(BLUE)► Push vers GitHub...$(NC)"
 	@git push
-	@echo "$(YELLOW)► Attente résultat CI GitHub...$(NC)"
-	@gh run watch --exit-status
+	@echo "$(YELLOW)► Attente démarrage CI GitHub...$(NC)"
+	@sleep 3
+	@echo "$(YELLOW)► Surveillance CI GitHub...$(NC)"
+	@gh run watch --exit-status || gh run view --exit-status
 	@echo "$(GREEN)✓ CI GitHub validé$(NC)"
