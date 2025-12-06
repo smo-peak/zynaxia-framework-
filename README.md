@@ -1,53 +1,26 @@
 # ZYNAXIA Framework
 
+[![CI/CD](https://github.com/smo-peak/zynaxia-framework-/actions/workflows/ci.yaml/badge.svg)](https://github.com/smo-peak/zynaxia-framework-/actions/workflows/ci.yaml)
+
 Framework de sécurité multi-tenant pour applications Defense-grade.
 
 ## Status
 
-🚧 **En développement** - Version 0.1.0
-
-## Architecture
-
-- **392 invariants** de sécurité immuables
-- **8 lots** de développement indépendants
-- Conformité **RGS 3★**, **IEC 62443**, **RGPD**
-
-## Structure
-```
-src/
-├── invariants/    # Règles de sécurité immuables
-├── core/          # LOT 1 - Fondations
-├── isolation/     # LOT 2 - Multi-tenant
-├── auth/          # LOT 3 - Authentification
-├── audit/         # LOT 4 - Traçabilité
-├── licensing/     # LOT 5 - Licences
-├── ha/            # LOT 6 - Haute disponibilité
-├── deployment/    # LOT 7 - Déploiement
-└── incident/      # LOT 8 - Réponse incidents
-```
-
-## Installation (dev)
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-dev.txt
-```
+En développement - Version 0.1.0
 
 ## Tests
 ```bash
-# Tests unitaires
-pytest tests/unit/
-
-# Tests compliance
-pytest tests/compliance/
-
-# Tous les tests
+pytest tests/unit/ -v
+pytest tests/unit/ --cov=src --cov-report=term-missing
 pytest
 ```
 
-## Documentation
+## Architecture
 
-Voir le dossier `docs/` et la base de connaissances du projet.
+- 529+ tests unitaires automatisés
+- 252 invariants de sécurité immuables
+- 8 lots de développement
+- Conformité RGS 3 étoiles, IEC 62443, RGPD
 
 ## Licence
 

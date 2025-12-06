@@ -1,8 +1,21 @@
--r requirements.txt
-pytest>=7.0
+# Core
+pyyaml>=6.0
+pydantic>=2.0
+python-jose[cryptography]>=3.3.0
+cryptography>=41.0
+psycopg2-binary>=2.9
+
+# Testing
+pytest>=8.0
 pytest-cov>=4.0
-pytest-asyncio>=0.21
-black>=23.0
-isort>=5.0
-bandit>=1.7
+pytest-asyncio>=0.23
+
+# Quality
+ruff>=0.1.0
 mypy>=1.0
+bandit>=1.7
+safety>=2.3
+
+# Async
+aiohttp>=3.9
+httpx>=0.25
