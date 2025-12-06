@@ -7,6 +7,7 @@ gestion du cache local et file d'attente d'événements.
 Invariants:
     RUN_053: Cache config TTL 7 jours max
 """
+
 import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -18,6 +19,7 @@ from src.ha.interfaces import IConfigSyncService, IDegradedModeController, SyncR
 
 class ConfigSyncError(Exception):
     """Erreur lors de la synchronisation."""
+
     pass
 
 
@@ -72,9 +74,7 @@ class ConfigSyncService(IConfigSyncService):
         self._pending_events: List[Dict[str, Any]] = []
         self._sync_errors: List[str] = []
 
-    async def _default_cloud_client(
-        self, endpoint: str, data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _default_cloud_client(self, endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Client cloud par défaut (simule erreur de connexion).
 
@@ -213,10 +213,7 @@ class ConfigSyncService(IConfigSyncService):
                 else:
                     # Garder uniquement les événements échoués
                     failed_ids = set(response.get("failed_ids", []))
-                    self._pending_events = [
-                        e for e in self._pending_events
-                        if e.get("id") in failed_ids
-                    ]
+                    self._pending_events = [e for e in self._pending_events if e.get("id") in failed_ids]
 
                 # Émettre événement audit
                 await self._audit.emit_event(

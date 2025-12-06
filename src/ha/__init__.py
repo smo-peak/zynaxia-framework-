@@ -21,6 +21,7 @@ Invariants couverts:
 - RUN_052: Mode dégradé si Cloud offline
 - RUN_053: Cache config TTL 7 jours max
 """
+
 from .interfaces import (
     # Enums
     HealthStatus,

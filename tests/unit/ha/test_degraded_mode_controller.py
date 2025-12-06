@@ -9,6 +9,7 @@ Invariants testés:
         - Nouvelles configs: Cache local uniquement
     RUN_053: Cache config TTL 7 jours max
 """
+
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock
@@ -25,6 +26,7 @@ from src.licensing.interfaces import ILicenseCache
 # ══════════════════════════════════════════════════════════════════════════════
 # FIXTURES
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_audit_emitter():
@@ -64,6 +66,7 @@ def degraded_controller_old_cache(mock_audit_emitter, mock_license_cache):
 # TESTS INTERFACE
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestDegradedModeControllerInterface:
     """Vérifie conformité interface."""
 
@@ -85,6 +88,7 @@ class TestDegradedModeControllerInterface:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS RUN_052: MODE DÉGRADÉ
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestRUN052Compliance:
     """Tests conformité RUN_052: Mode dégradé si Cloud offline."""
@@ -172,6 +176,7 @@ class TestRUN052Compliance:
 # TESTS RUN_053: CACHE CONFIG TTL 7 JOURS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestRUN053Compliance:
     """Tests conformité RUN_053: Cache config TTL 7 jours max."""
 
@@ -187,9 +192,7 @@ class TestRUN053Compliance:
         """RUN_053: Cache > 7 jours invalide."""
         assert degraded_controller_old_cache.is_config_cache_valid() is False
 
-    def test_RUN_053_cache_exactly_7_days_valid(
-        self, mock_audit_emitter, mock_license_cache
-    ):
+    def test_RUN_053_cache_exactly_7_days_valid(self, mock_audit_emitter, mock_license_cache):
         """RUN_053: Cache exactement 7 jours valide."""
         # Utiliser 6 jours 23h 59m pour être sûr d'être sous les 7 jours
         timestamp = datetime.now() - timedelta(days=6, hours=23, minutes=59)
@@ -201,9 +204,7 @@ class TestRUN053Compliance:
 
         assert controller.is_config_cache_valid() is True
 
-    def test_RUN_053_cache_7_days_1_second_invalid(
-        self, mock_audit_emitter, mock_license_cache
-    ):
+    def test_RUN_053_cache_7_days_1_second_invalid(self, mock_audit_emitter, mock_license_cache):
         """RUN_053: Cache 7 jours + 1 seconde invalide."""
         timestamp = datetime.now() - timedelta(days=7, seconds=1)
         controller = DegradedModeController(
@@ -240,6 +241,7 @@ class TestRUN053Compliance:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS FILE D'ATTENTE ÉVÉNEMENTS
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestEventQueue:
     """Tests file d'attente événements pour sync."""
@@ -310,6 +312,7 @@ class TestEventQueue:
 # TESTS ENTRÉE/SORTIE MODE DÉGRADÉ
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestDegradedModeTransitions:
     """Tests transitions mode dégradé."""
 
@@ -364,6 +367,7 @@ class TestDegradedModeTransitions:
         first_timestamp = degraded_controller.get_degraded_since()
 
         import time
+
         time.sleep(0.01)
 
         degraded_controller.enter_degraded_mode("Second reason")
@@ -384,6 +388,7 @@ class TestDegradedModeTransitions:
 # TESTS DURÉE MODE DÉGRADÉ
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestDegradedDuration:
     """Tests durée en mode dégradé."""
 
@@ -396,6 +401,7 @@ class TestDegradedDuration:
         degraded_controller.enter_degraded_mode("Test")
 
         import time
+
         time.sleep(0.1)
 
         duration = degraded_controller.get_degraded_duration_seconds()
@@ -405,6 +411,7 @@ class TestDegradedDuration:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS VÉRIFICATION FEATURES
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestFeatureAvailability:
     """Tests disponibilité features."""
@@ -429,6 +436,7 @@ class TestFeatureAvailability:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS STATUS COMPLET
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestStatus:
     """Tests status complet."""

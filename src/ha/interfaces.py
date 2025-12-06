@@ -8,6 +8,7 @@ Invariants:
     HEALTH_001-008: Health checks et endpoints
     RUN_050-053: Cluster et failover
 """
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -21,6 +22,7 @@ class HealthStatus(Enum):
 
     Invariant HEALTH_006: Status possibles.
     """
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -33,6 +35,7 @@ class HealthCheck:
 
     Invariant HEALTH_005: Checks incluent database, vault, keycloak, disk, memory.
     """
+
     name: str  # database, vault, keycloak, disk, memory
     status: HealthStatus
     latency_ms: Optional[int] = None
@@ -47,6 +50,7 @@ class HealthReport:
 
     Invariant HEALTH_004: Format JSON {status, checks[], timestamp}.
     """
+
     status: HealthStatus
     timestamp: datetime
     checks: List[HealthCheck]
@@ -78,6 +82,7 @@ class ClusterStatus:
 
     Invariant RUN_050: Cluster minimum 2 noeuds.
     """
+
     node_count: int
     primary_node: str
     healthy_nodes: List[str]
@@ -91,6 +96,7 @@ class ClusterStatus:
 @dataclass
 class SyncResult:
     """Résultat d'une synchronisation cloud."""
+
     success: bool
     synced_at: datetime
     items_synced: int = 0

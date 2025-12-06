@@ -11,6 +11,7 @@ Invariants:
         - Promotion timeout: 5s max
         - Total: 8s < 10s
 """
+
 import asyncio
 import time
 from dataclasses import dataclass, field
@@ -28,12 +29,14 @@ from src.ha.interfaces import (
 
 class FailoverError(Exception):
     """Erreur lors du failover."""
+
     pass
 
 
 @dataclass
 class NodeInfo:
     """Information sur un noeud du cluster."""
+
     node_id: str
     is_primary: bool
     last_heartbeat: datetime
@@ -186,10 +189,7 @@ class FailoverManager(IFailoverManager):
         now = datetime.now()
         heartbeat_age = (now - primary_info.last_heartbeat).total_seconds()
 
-        return (
-            heartbeat_age > self.HEARTBEAT_TIMEOUT_SECONDS
-            or primary_info.status == HealthStatus.UNHEALTHY
-        )
+        return heartbeat_age > self.HEARTBEAT_TIMEOUT_SECONDS or primary_info.status == HealthStatus.UNHEALTHY
 
     async def trigger_failover(self, reason: str) -> None:
         """
@@ -217,9 +217,7 @@ class FailoverManager(IFailoverManager):
                     timeout=self.DETECTION_TIMEOUT,
                 )
             except asyncio.TimeoutError:
-                raise FailoverError(
-                    f"Detection timeout exceeded ({self.DETECTION_TIMEOUT}s)"
-                )
+                raise FailoverError(f"Detection timeout exceeded ({self.DETECTION_TIMEOUT}s)")
 
             if not is_primary_failed:
                 raise FailoverError("Primary is still healthy, no failover needed")
@@ -239,16 +237,12 @@ class FailoverManager(IFailoverManager):
                     timeout=self.PROMOTION_TIMEOUT,
                 )
             except asyncio.TimeoutError:
-                raise FailoverError(
-                    f"Promotion timeout exceeded ({self.PROMOTION_TIMEOUT}s)"
-                )
+                raise FailoverError(f"Promotion timeout exceeded ({self.PROMOTION_TIMEOUT}s)")
 
             # Vérifier temps total (RUN_051)
             elapsed = time.perf_counter() - start_time
             if elapsed > self.MAX_FAILOVER_TIME:
-                raise FailoverError(
-                    f"Failover took {elapsed:.2f}s, exceeds max {self.MAX_FAILOVER_TIME}s (RUN_051)"
-                )
+                raise FailoverError(f"Failover took {elapsed:.2f}s, exceeds max {self.MAX_FAILOVER_TIME}s (RUN_051)")
 
             # Émettre événement audit
             await self._audit.emit_event(
@@ -291,7 +285,7 @@ class FailoverManager(IFailoverManager):
         # Promouvoir le nouveau primary
         self._nodes[node_id].is_primary = True
         self._primary_node = node_id
-        self._is_primary = (node_id == self._node_id)
+        self._is_primary = node_id == self._node_id
 
         # Émettre événement audit
         await self._audit.emit_event(

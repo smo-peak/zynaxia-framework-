@@ -13,6 +13,7 @@ Invariants:
     HEALTH_007: Unhealthy = ne reçoit plus de trafic
     HEALTH_008: Health check < 5 secondes (timeout)
 """
+
 import asyncio
 import shutil
 import psutil
@@ -32,6 +33,7 @@ from src.ha.interfaces import (
 
 class HealthMonitorError(Exception):
     """Erreur du moniteur de santé."""
+
     pass
 
 
@@ -198,9 +200,7 @@ class HealthMonitor(IHealthMonitor):
                 message=str(e),
             )
 
-    async def _run_check_with_timeout(
-        self, name: str, checker: HealthChecker
-    ) -> HealthCheck:
+    async def _run_check_with_timeout(self, name: str, checker: HealthChecker) -> HealthCheck:
         """
         Exécute un check avec timeout (HEALTH_008).
 
@@ -280,10 +280,7 @@ class HealthMonitor(IHealthMonitor):
             Rapport de santé complet.
         """
         # Exécuter tous les checks en parallèle avec timeout
-        tasks = [
-            self._run_check_with_timeout(name, checker)
-            for name, checker in self._checkers.items()
-        ]
+        tasks = [self._run_check_with_timeout(name, checker) for name, checker in self._checkers.items()]
         checks = await asyncio.gather(*tasks)
 
         # Calculer le status global (HEALTH_006)
@@ -358,11 +355,7 @@ class HealthMonitor(IHealthMonitor):
             return []
 
         cutoff = datetime.now() - timedelta(minutes=minutes)
-        return [
-            report
-            for report in self._history
-            if report.timestamp >= cutoff
-        ]
+        return [report for report in self._history if report.timestamp >= cutoff]
 
     def register_check(self, name: str, checker: HealthChecker) -> None:
         """

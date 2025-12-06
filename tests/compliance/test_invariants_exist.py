@@ -62,23 +62,26 @@ class TestInvariantsExist:
 class TestInvariantSections:
     """Vérifie que chaque section est correctement définie."""
 
-    @pytest.mark.parametrize("prefix,min_count", [
-        ("PROV", 10),
-        ("DEPL", 15),
-        ("RUN", 20),
-        ("MAINT", 30),
-        ("LIC", 50),
-        ("DECOM", 15),
-        ("MIGR", 5),
-        ("API", 5),
-        ("INCID", 10),
-        ("OBS", 5),
-        ("NET", 5),
-        ("RATE", 5),
-        ("LOG", 5),
-        ("HEALTH", 5),
-        ("TIME", 5),
-    ])
+    @pytest.mark.parametrize(
+        "prefix,min_count",
+        [
+            ("PROV", 10),
+            ("DEPL", 15),
+            ("RUN", 20),
+            ("MAINT", 30),
+            ("LIC", 50),
+            ("DECOM", 15),
+            ("MIGR", 5),
+            ("API", 5),
+            ("INCID", 10),
+            ("OBS", 5),
+            ("NET", 5),
+            ("RATE", 5),
+            ("LOG", 5),
+            ("HEALTH", 5),
+            ("TIME", 5),
+        ],
+    )
     def test_section_has_minimum_rules(self, prefix: str, min_count: int):
         """Chaque section doit avoir un nombre minimum de règles."""
         count = sum(1 for id in ALL_INVARIANTS.keys() if id.startswith(prefix))
@@ -88,26 +91,32 @@ class TestInvariantSections:
 class TestCriticalInvariants:
     """Vérifie que les invariants critiques sont présents."""
 
-    @pytest.mark.parametrize("rule_id", [
-        "RUN_001",  # RLS obligatoire
-        "RUN_010",  # Keycloak obligatoire
-        "RUN_030",  # ECDSA-P384
-        "RUN_033",  # Secrets jamais en clair
-        "LIC_012",  # Invalide = kill switch
-        "LIC_070",  # Kill switch arrêt contrôlé
-        "PROV_010", # Vault KMS auto-unseal
-    ])
+    @pytest.mark.parametrize(
+        "rule_id",
+        [
+            "RUN_001",  # RLS obligatoire
+            "RUN_010",  # Keycloak obligatoire
+            "RUN_030",  # ECDSA-P384
+            "RUN_033",  # Secrets jamais en clair
+            "LIC_012",  # Invalide = kill switch
+            "LIC_070",  # Kill switch arrêt contrôlé
+            "PROV_010",  # Vault KMS auto-unseal
+        ],
+    )
     def test_critical_invariant_exists(self, rule_id: str):
         """Les invariants critiques doivent exister."""
         assert rule_id in ALL_INVARIANTS, f"Critical invariant {rule_id} missing"
 
-    @pytest.mark.parametrize("rule_id", [
-        "RUN_001",
-        "RUN_010",
-        "RUN_030",
-        "LIC_012",
-        "LIC_070",
-    ])
+    @pytest.mark.parametrize(
+        "rule_id",
+        [
+            "RUN_001",
+            "RUN_010",
+            "RUN_030",
+            "LIC_012",
+            "LIC_070",
+        ],
+    )
     def test_critical_invariants_are_blocking(self, rule_id: str):
         """Les invariants critiques doivent être BLOCKING."""
         invariant = ALL_INVARIANTS[rule_id]

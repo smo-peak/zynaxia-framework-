@@ -5,6 +5,7 @@ Invariants testés:
     RUN_053: Cache config TTL 7 jours max
     Sync bidirectionnelle Edge ↔ Cloud
 """
+
 import pytest
 import asyncio
 from datetime import datetime, timedelta
@@ -18,6 +19,7 @@ from src.audit.interfaces import IAuditEmitter
 # ══════════════════════════════════════════════════════════════════════════════
 # FIXTURES
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_audit_emitter():
@@ -42,6 +44,7 @@ def mock_degraded_controller():
 @pytest.fixture
 def mock_cloud_client_success():
     """Client cloud mocké qui réussit."""
+
     async def client(endpoint: str, data: dict) -> dict:
         if endpoint == "config/sync":
             return {
@@ -58,23 +61,28 @@ def mock_cloud_client_success():
                 "failed": 0,
             }
         return {"success": True}
+
     return client
 
 
 @pytest.fixture
 def mock_cloud_client_failure():
     """Client cloud mocké qui échoue."""
+
     async def client(endpoint: str, data: dict) -> dict:
         raise ConfigSyncError("Connection refused")
+
     return client
 
 
 @pytest.fixture
 def mock_cloud_client_timeout():
     """Client cloud mocké qui timeout."""
+
     async def client(endpoint: str, data: dict) -> dict:
         await asyncio.sleep(100)  # Très long
         return {}
+
     return client
 
 
@@ -103,6 +111,7 @@ def sync_service_failing(mock_audit_emitter, mock_degraded_controller, mock_clou
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS INTERFACE
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestConfigSyncServiceInterface:
     """Vérifie conformité interface."""
@@ -140,6 +149,7 @@ class TestConfigSyncServiceInterface:
 # TESTS RUN_053: CACHE CONFIG TTL 7 JOURS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestRUN053Compliance:
     """Tests conformité RUN_053: Cache config TTL 7 jours max."""
 
@@ -170,17 +180,13 @@ class TestRUN053Compliance:
 
     def test_RUN_053_cache_exactly_7_days_not_expired(self, sync_service):
         """RUN_053: Cache exactement 7 jours - 1min non expiré."""
-        sync_service._config_cache_timestamp = (
-            datetime.now() - timedelta(days=6, hours=23, minutes=59)
-        )
+        sync_service._config_cache_timestamp = datetime.now() - timedelta(days=6, hours=23, minutes=59)
 
         assert sync_service.is_cache_expired() is False
 
     def test_RUN_053_cache_7_days_1_second_expired(self, sync_service):
         """RUN_053: Cache 7 jours + 1 seconde expiré."""
-        sync_service._config_cache_timestamp = (
-            datetime.now() - timedelta(days=7, seconds=1)
-        )
+        sync_service._config_cache_timestamp = datetime.now() - timedelta(days=7, seconds=1)
 
         assert sync_service.is_cache_expired() is True
 
@@ -200,6 +206,7 @@ class TestRUN053Compliance:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS SYNC FROM CLOUD
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestSyncFromCloud:
     """Tests synchronisation depuis le Cloud."""
@@ -241,9 +248,7 @@ class TestSyncFromCloud:
         mock_audit_emitter.emit_event.assert_called()
 
     @pytest.mark.asyncio
-    async def test_sync_from_cloud_exits_degraded_mode(
-        self, sync_service, mock_degraded_controller
-    ):
+    async def test_sync_from_cloud_exits_degraded_mode(self, sync_service, mock_degraded_controller):
         """Sync réussie sort du mode dégradé."""
         mock_degraded_controller.is_degraded.return_value = True
 
@@ -252,9 +257,7 @@ class TestSyncFromCloud:
         mock_degraded_controller.exit_degraded_mode.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_sync_from_cloud_failure_enters_degraded(
-        self, sync_service_failing, mock_degraded_controller
-    ):
+    async def test_sync_from_cloud_failure_enters_degraded(self, sync_service_failing, mock_degraded_controller):
         """Sync échouée entre en mode dégradé."""
         mock_degraded_controller.is_degraded.return_value = False
 
@@ -295,6 +298,7 @@ class TestSyncFromCloud:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS PUSH EVENTS TO CLOUD
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestPushEventsToCloud:
     """Tests synchronisation événements vers le Cloud."""
@@ -352,6 +356,7 @@ class TestPushEventsToCloud:
 # TESTS SYNC OVERDUE
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestSyncOverdue:
     """Tests détection sync en retard."""
 
@@ -387,6 +392,7 @@ class TestSyncOverdue:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS CACHE CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestCacheConfig:
     """Tests cache de configuration."""
@@ -432,6 +438,7 @@ class TestCacheConfig:
 # TESTS EVENT QUEUE
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestEventQueue:
     """Tests file d'attente événements."""
 
@@ -461,9 +468,7 @@ class TestEventQueue:
         assert result is False
         assert sync_service.get_pending_events_count() == sync_service.MAX_PENDING_EVENTS
 
-    def test_queue_event_also_queues_in_degraded(
-        self, sync_service, mock_degraded_controller
-    ):
+    def test_queue_event_also_queues_in_degraded(self, sync_service, mock_degraded_controller):
         """Queue met aussi en file dans degraded controller."""
         sync_service.queue_event({"type": "test"})
 
@@ -492,6 +497,7 @@ class TestEventQueue:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS SYNC STATUS
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestSyncStatus:
     """Tests status de synchronisation."""
@@ -541,6 +547,7 @@ class TestSyncStatus:
 # TESTS NEXT SYNC DUE
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestNextSyncDue:
     """Tests calcul prochaine sync."""
 
@@ -566,6 +573,7 @@ class TestNextSyncDue:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS PROPERTIES
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestProperties:
     """Tests propriétés."""

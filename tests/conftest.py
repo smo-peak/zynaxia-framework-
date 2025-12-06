@@ -17,6 +17,7 @@ def fixtures_path() -> Path:
 def valid_minimal_config(fixtures_path: Path) -> dict:
     """Charge la configuration minimale valide."""
     import yaml
+
     config_path = fixtures_path / "configs" / "valid_minimal.yaml"
     with open(config_path) as f:
         return yaml.safe_load(f)
@@ -26,4 +27,5 @@ def valid_minimal_config(fixtures_path: Path) -> dict:
 def all_invariants() -> dict:
     """Retourne tous les invariants."""
     from src.invariants.rules import ALL_INVARIANTS
+
     return ALL_INVARIANTS

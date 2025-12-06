@@ -11,6 +11,7 @@ Invariants testés:
     HEALTH_007: Unhealthy = ne reçoit plus de trafic
     HEALTH_008: Health check < 5 secondes (timeout)
 """
+
 import pytest
 import asyncio
 from datetime import datetime, timedelta
@@ -30,6 +31,7 @@ from src.audit.interfaces import IAuditEmitter, AuditEventType
 # ══════════════════════════════════════════════════════════════════════════════
 # FIXTURES
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_audit_emitter():
@@ -84,6 +86,7 @@ def degraded_check():
 # TESTS INTERFACE
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestHealthMonitorInterface:
     """Vérifie conformité interface."""
 
@@ -105,6 +108,7 @@ class TestHealthMonitorInterface:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS HEALTH_001: ENDPOINT /health
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestHEALTH001Compliance:
     """Tests conformité HEALTH_001: Endpoint /health obligatoire."""
@@ -132,6 +136,7 @@ class TestHEALTH001Compliance:
 # TESTS HEALTH_002: LIVENESS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestHEALTH002Compliance:
     """Tests conformité HEALTH_002: /health/live."""
 
@@ -145,6 +150,7 @@ class TestHEALTH002Compliance:
     @pytest.mark.asyncio
     async def test_HEALTH_002_liveness_always_responds(self, health_monitor):
         """HEALTH_002: Liveness répond même si checks échouent."""
+
         # Enregistrer un checker qui timeout
         async def slow_checker() -> HealthCheck:
             await asyncio.sleep(10)
@@ -164,6 +170,7 @@ class TestHEALTH002Compliance:
 # TESTS HEALTH_003: READINESS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestHEALTH003Compliance:
     """Tests conformité HEALTH_003: /health/ready."""
 
@@ -176,10 +183,9 @@ class TestHEALTH003Compliance:
         assert is_ready is True
 
     @pytest.mark.asyncio
-    async def test_HEALTH_003_readiness_false_when_unhealthy(
-        self, health_monitor, mock_audit_emitter
-    ):
+    async def test_HEALTH_003_readiness_false_when_unhealthy(self, health_monitor, mock_audit_emitter):
         """HEALTH_003: Readiness False si check critique échoue."""
+
         # Remplacer checker database pour échouer
         async def failing_db_check() -> HealthCheck:
             return HealthCheck(
@@ -194,10 +200,9 @@ class TestHEALTH003Compliance:
         assert is_ready is False
 
     @pytest.mark.asyncio
-    async def test_HEALTH_003_readiness_true_when_degraded(
-        self, health_monitor, mock_audit_emitter
-    ):
+    async def test_HEALTH_003_readiness_true_when_degraded(self, health_monitor, mock_audit_emitter):
         """HEALTH_003: Readiness True même si dégradé (non critique)."""
+
         # Remplacer checker disk pour dégradé
         async def degraded_disk_check() -> HealthCheck:
             return HealthCheck(
@@ -217,6 +222,7 @@ class TestHEALTH003Compliance:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS HEALTH_004: FORMAT JSON
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestHEALTH004Compliance:
     """Tests conformité HEALTH_004: Format JSON {status, checks[], timestamp}."""
@@ -279,6 +285,7 @@ class TestHEALTH004Compliance:
 # TESTS HEALTH_005: CHECKS REQUIS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestHEALTH005Compliance:
     """Tests conformité HEALTH_005: Checks database, vault, keycloak, disk, memory."""
 
@@ -327,6 +334,7 @@ class TestHEALTH005Compliance:
 # TESTS HEALTH_006: STATUS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestHEALTH006Compliance:
     """Tests conformité HEALTH_006: Status healthy, degraded, unhealthy."""
 
@@ -339,6 +347,7 @@ class TestHEALTH006Compliance:
     @pytest.mark.asyncio
     async def test_HEALTH_006_all_healthy_returns_healthy(self, health_monitor):
         """HEALTH_006: Tous checks healthy → status healthy."""
+
         # Remplacer tous les checkers par des healthy
         async def healthy_check() -> HealthCheck:
             return HealthCheck(name="test", status=HealthStatus.HEALTHY)
@@ -350,10 +359,9 @@ class TestHEALTH006Compliance:
         assert report.status == HealthStatus.HEALTHY
 
     @pytest.mark.asyncio
-    async def test_HEALTH_006_critical_unhealthy_returns_unhealthy(
-        self, health_monitor
-    ):
+    async def test_HEALTH_006_critical_unhealthy_returns_unhealthy(self, health_monitor):
         """HEALTH_006: Check critique unhealthy → status unhealthy."""
+
         async def unhealthy_db() -> HealthCheck:
             return HealthCheck(
                 name="database",
@@ -367,10 +375,9 @@ class TestHEALTH006Compliance:
         assert report.status == HealthStatus.UNHEALTHY
 
     @pytest.mark.asyncio
-    async def test_HEALTH_006_non_critical_unhealthy_returns_degraded(
-        self, health_monitor
-    ):
+    async def test_HEALTH_006_non_critical_unhealthy_returns_degraded(self, health_monitor):
         """HEALTH_006: Check non-critique unhealthy → status degraded."""
+
         # Disk n'est pas critique
         async def unhealthy_disk() -> HealthCheck:
             return HealthCheck(
@@ -387,6 +394,7 @@ class TestHEALTH006Compliance:
     @pytest.mark.asyncio
     async def test_HEALTH_006_degraded_returns_degraded(self, health_monitor):
         """HEALTH_006: Check dégradé → status degraded."""
+
         async def degraded_memory() -> HealthCheck:
             return HealthCheck(
                 name="memory",
@@ -405,12 +413,14 @@ class TestHEALTH006Compliance:
 # TESTS HEALTH_007: UNHEALTHY = PAS DE TRAFIC
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestHEALTH007Compliance:
     """Tests conformité HEALTH_007: Unhealthy = ne reçoit plus de trafic."""
 
     @pytest.mark.asyncio
     async def test_HEALTH_007_unhealthy_readiness_false(self, health_monitor):
         """HEALTH_007: Status unhealthy → readiness False."""
+
         # Forcer database unhealthy
         async def unhealthy_db() -> HealthCheck:
             return HealthCheck(
@@ -427,6 +437,7 @@ class TestHEALTH007Compliance:
     @pytest.mark.asyncio
     async def test_HEALTH_007_vault_unhealthy_stops_traffic(self, health_monitor):
         """HEALTH_007: Vault unhealthy → ne reçoit plus de trafic."""
+
         async def unhealthy_vault() -> HealthCheck:
             return HealthCheck(
                 name="vault",
@@ -443,6 +454,7 @@ class TestHEALTH007Compliance:
 # TESTS HEALTH_008: TIMEOUT 5 SECONDES
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestHEALTH008Compliance:
     """Tests conformité HEALTH_008: Health check < 5 secondes."""
 
@@ -453,6 +465,7 @@ class TestHEALTH008Compliance:
     @pytest.mark.asyncio
     async def test_HEALTH_008_slow_check_timeout(self, health_monitor):
         """HEALTH_008: Check lent → timeout → unhealthy."""
+
         async def very_slow_check() -> HealthCheck:
             await asyncio.sleep(10)  # Plus que timeout
             return HealthCheck(name="slow", status=HealthStatus.HEALTHY)
@@ -468,9 +481,7 @@ class TestHEALTH008Compliance:
         assert duration < 6.0
 
         # Le check slow doit être unhealthy
-        slow_check = next(
-            (c for c in report.checks if c.name == "slow_service"), None
-        )
+        slow_check = next((c for c in report.checks if c.name == "slow_service"), None)
         assert slow_check is not None
         assert slow_check.status == HealthStatus.UNHEALTHY
         assert "timeout" in slow_check.message.lower()
@@ -478,6 +489,7 @@ class TestHEALTH008Compliance:
     @pytest.mark.asyncio
     async def test_HEALTH_008_fast_check_succeeds(self, health_monitor):
         """HEALTH_008: Check rapide réussit."""
+
         async def fast_check() -> HealthCheck:
             await asyncio.sleep(0.01)  # Très rapide
             return HealthCheck(
@@ -490,9 +502,7 @@ class TestHEALTH008Compliance:
 
         report = await health_monitor.check_health()
 
-        fast_check_result = next(
-            (c for c in report.checks if c.name == "fast_service"), None
-        )
+        fast_check_result = next((c for c in report.checks if c.name == "fast_service"), None)
         assert fast_check_result is not None
         assert fast_check_result.status == HealthStatus.HEALTHY
 
@@ -500,6 +510,7 @@ class TestHEALTH008Compliance:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS HISTORIQUE
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestHealthHistory:
     """Tests historique des rapports de santé."""
@@ -542,12 +553,14 @@ class TestHealthHistory:
 # TESTS REGISTER CHECK
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestRegisterCheck:
     """Tests enregistrement checkers personnalisés."""
 
     @pytest.mark.asyncio
     async def test_register_custom_check(self, health_monitor):
         """Enregistrement checker personnalisé."""
+
         async def custom_check() -> HealthCheck:
             return HealthCheck(
                 name="custom",
@@ -567,6 +580,7 @@ class TestRegisterCheck:
     @pytest.mark.asyncio
     async def test_override_existing_check(self, health_monitor):
         """Remplacement checker existant."""
+
         async def new_db_check() -> HealthCheck:
             return HealthCheck(
                 name="database",
@@ -587,6 +601,7 @@ class TestRegisterCheck:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS HEARTBEAT
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestHeartbeat:
     """Tests envoi heartbeat."""
@@ -609,12 +624,14 @@ class TestHeartbeat:
 # TESTS GESTION ERREURS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestErrorHandling:
     """Tests gestion erreurs."""
 
     @pytest.mark.asyncio
     async def test_check_error_returns_unhealthy(self, health_monitor):
         """Erreur dans check → unhealthy."""
+
         async def error_check() -> HealthCheck:
             raise Exception("Connection error")
 
@@ -622,9 +639,7 @@ class TestErrorHandling:
 
         report = await health_monitor.check_health()
 
-        error_check_result = next(
-            (c for c in report.checks if c.name == "error_service"), None
-        )
+        error_check_result = next((c for c in report.checks if c.name == "error_service"), None)
         assert error_check_result is not None
         assert error_check_result.status == HealthStatus.UNHEALTHY
         assert "error" in error_check_result.message.lower()
@@ -632,6 +647,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_all_checks_run_despite_errors(self, health_monitor):
         """Tous les checks exécutés malgré erreurs."""
+
         async def error_check() -> HealthCheck:
             raise Exception("Error")
 
@@ -650,6 +666,7 @@ class TestErrorHandling:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS DATA CLASSES
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestDataClasses:
     """Tests classes de données."""

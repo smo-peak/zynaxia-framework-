@@ -1,58 +1,27 @@
-[build-system]
-requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "zynaxia-framework"
 version = "0.1.0"
-description = "ZYNAXIA Security Framework - Multi-tenant platform for Defense-grade applications"
-readme = "README.md"
-license = {text = "Proprietary"}
-requires-python = ">=3.11"
-authors = [
-    {name = "Stephane Music", email = "music.stephane@gmail.com"}
-]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-
-dependencies = [
-    "pydantic>=2.0",
-    "pyyaml>=6.0",
-    "hvac>=2.0",
-    "cryptography>=41.0",
-    "httpx>=0.25",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "pytest-asyncio>=0.21",
-    "black>=23.0",
-    "isort>=5.0",
-    "bandit>=1.7",
-    "mypy>=1.0",
-]
+requires-python = ">=3.12"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_functions = ["test_*"]
 asyncio_mode = "auto"
+testpaths = ["tests"]
 
-[tool.black]
-line-length = 100
-target-version = ["py311"]
+[tool.ruff]
+line-length = 120
+target-version = "py312"
 
-[tool.isort]
-profile = "black"
-line_length = 100
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["F401"]  # Ignore unused imports (on les gère manuellement)
 
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_ignores = true
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F841"]  # Ignore unused variables dans tests
+"__init__.py" = ["F401"]  # Ignore unused imports dans __init__
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 80

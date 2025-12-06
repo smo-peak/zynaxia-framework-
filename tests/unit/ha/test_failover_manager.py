@@ -7,6 +7,7 @@ Invariants testés:
         - Detection timeout: 3s max
         - Promotion timeout: 5s max
 """
+
 import pytest
 import asyncio
 import time
@@ -29,6 +30,7 @@ from src.audit.interfaces import IAuditEmitter, AuditEventType
 # FIXTURES
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 @pytest.fixture
 def mock_audit_emitter():
     """AuditEmitter mocké pour tests."""
@@ -41,12 +43,14 @@ def mock_audit_emitter():
 def mock_health_monitor():
     """HealthMonitor mocké pour tests."""
     monitor = Mock(spec=IHealthMonitor)
-    monitor.check_health = AsyncMock(return_value=HealthReport(
-        status=HealthStatus.HEALTHY,
-        timestamp=datetime.now(),
-        checks=[],
-        node_id="node-1",
-    ))
+    monitor.check_health = AsyncMock(
+        return_value=HealthReport(
+            status=HealthStatus.HEALTHY,
+            timestamp=datetime.now(),
+            checks=[],
+            node_id="node-1",
+        )
+    )
     monitor.check_readiness = AsyncMock(return_value=True)
     return monitor
 
@@ -79,6 +83,7 @@ def cluster_failover_manager(mock_health_monitor, mock_audit_emitter):
 # TESTS INTERFACE
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestFailoverManagerInterface:
     """Vérifie conformité interface."""
 
@@ -106,6 +111,7 @@ class TestFailoverManagerInterface:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS RUN_050: CLUSTER MINIMUM 2 NOEUDS
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestRUN050Compliance:
     """Tests conformité RUN_050: Cluster minimum 2 noeuds."""
@@ -152,6 +158,7 @@ class TestRUN050Compliance:
 # TESTS RUN_051: FAILOVER < 10 SECONDES
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestRUN051Compliance:
     """Tests conformité RUN_051: Failover < 10 secondes."""
 
@@ -167,15 +174,11 @@ class TestRUN051Compliance:
         assert total < failover_manager.MAX_FAILOVER_TIME
 
     @pytest.mark.asyncio
-    async def test_RUN_051_failover_completes_under_10s(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_RUN_051_failover_completes_under_10s(self, cluster_failover_manager, mock_audit_emitter):
         """RUN_051: Failover complet < 10 secondes."""
         # Simuler primary défaillant
         cluster_failover_manager._nodes["node-1"].status = HealthStatus.UNHEALTHY
-        cluster_failover_manager._nodes["node-1"].last_heartbeat = (
-            datetime.now() - timedelta(seconds=10)
-        )
+        cluster_failover_manager._nodes["node-1"].last_heartbeat = datetime.now() - timedelta(seconds=10)
 
         start = time.perf_counter()
         await cluster_failover_manager.trigger_failover("Primary failed")
@@ -185,15 +188,11 @@ class TestRUN051Compliance:
         assert elapsed < 10.0
 
     @pytest.mark.asyncio
-    async def test_RUN_051_failover_promotes_standby(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_RUN_051_failover_promotes_standby(self, cluster_failover_manager, mock_audit_emitter):
         """RUN_051: Failover promeut un standby."""
         # Simuler primary défaillant
         cluster_failover_manager._nodes["node-1"].status = HealthStatus.UNHEALTHY
-        cluster_failover_manager._nodes["node-1"].last_heartbeat = (
-            datetime.now() - timedelta(seconds=10)
-        )
+        cluster_failover_manager._nodes["node-1"].last_heartbeat = datetime.now() - timedelta(seconds=10)
 
         old_primary = cluster_failover_manager.get_current_primary()
         await cluster_failover_manager.trigger_failover("Primary failed")
@@ -204,14 +203,10 @@ class TestRUN051Compliance:
         assert new_primary in ["node-2", "node-3"]
 
     @pytest.mark.asyncio
-    async def test_RUN_051_failover_emits_audit(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_RUN_051_failover_emits_audit(self, cluster_failover_manager, mock_audit_emitter):
         """RUN_051: Failover émet événement audit."""
         cluster_failover_manager._nodes["node-1"].status = HealthStatus.UNHEALTHY
-        cluster_failover_manager._nodes["node-1"].last_heartbeat = (
-            datetime.now() - timedelta(seconds=10)
-        )
+        cluster_failover_manager._nodes["node-1"].last_heartbeat = datetime.now() - timedelta(seconds=10)
 
         await cluster_failover_manager.trigger_failover("Test failover")
 
@@ -219,15 +214,13 @@ class TestRUN051Compliance:
         mock_audit_emitter.emit_event.assert_called()
         calls = mock_audit_emitter.emit_event.call_args_list
         # Au moins un appel pour failover_completed
-        assert any(
-            call[1].get("action") == "failover_completed"
-            for call in calls
-        )
+        assert any(call[1].get("action") == "failover_completed" for call in calls)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS ENREGISTREMENT NOEUDS
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestNodeRegistration:
     """Tests enregistrement/désenregistrement noeuds."""
@@ -268,6 +261,7 @@ class TestNodeRegistration:
 
         # Petite pause pour avoir un timestamp différent
         import time
+
         time.sleep(0.01)
 
         cluster_failover_manager.update_node_heartbeat("node-2")
@@ -286,13 +280,12 @@ class TestNodeRegistration:
 # TESTS PROMOTION
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestPromotion:
     """Tests promotion noeuds."""
 
     @pytest.mark.asyncio
-    async def test_promote_to_primary_success(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_promote_to_primary_success(self, cluster_failover_manager, mock_audit_emitter):
         """Promotion réussie d'un standby."""
         await cluster_failover_manager.promote_to_primary("node-2")
 
@@ -301,17 +294,13 @@ class TestPromotion:
         assert cluster_failover_manager._nodes["node-1"].is_primary is False
 
     @pytest.mark.asyncio
-    async def test_promote_unknown_node_fails(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_promote_unknown_node_fails(self, cluster_failover_manager, mock_audit_emitter):
         """Promotion noeud inconnu échoue."""
         with pytest.raises(FailoverError, match="not found"):
             await cluster_failover_manager.promote_to_primary("node-unknown")
 
     @pytest.mark.asyncio
-    async def test_promote_unhealthy_node_fails(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_promote_unhealthy_node_fails(self, cluster_failover_manager, mock_audit_emitter):
         """Promotion noeud unhealthy échoue."""
         cluster_failover_manager._nodes["node-2"].status = HealthStatus.UNHEALTHY
 
@@ -319,9 +308,7 @@ class TestPromotion:
             await cluster_failover_manager.promote_to_primary("node-2")
 
     @pytest.mark.asyncio
-    async def test_promote_emits_audit(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_promote_emits_audit(self, cluster_failover_manager, mock_audit_emitter):
         """Promotion émet événement audit."""
         await cluster_failover_manager.promote_to_primary("node-2")
 
@@ -334,36 +321,29 @@ class TestPromotion:
 # TESTS FAILOVER ERREURS
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestFailoverErrors:
     """Tests erreurs failover."""
 
     @pytest.mark.asyncio
-    async def test_failover_no_standby_fails(
-        self, failover_manager, mock_audit_emitter
-    ):
+    async def test_failover_no_standby_fails(self, failover_manager, mock_audit_emitter):
         """Failover sans standby échoue."""
         failover_manager.register_node("node-1", is_primary=True)
         failover_manager._nodes["node-1"].status = HealthStatus.UNHEALTHY
-        failover_manager._nodes["node-1"].last_heartbeat = (
-            datetime.now() - timedelta(seconds=10)
-        )
+        failover_manager._nodes["node-1"].last_heartbeat = datetime.now() - timedelta(seconds=10)
 
         with pytest.raises(FailoverError, match="No healthy standby"):
             await failover_manager.trigger_failover("No standby available")
 
     @pytest.mark.asyncio
-    async def test_failover_primary_healthy_fails(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_failover_primary_healthy_fails(self, cluster_failover_manager, mock_audit_emitter):
         """Failover quand primary healthy échoue."""
         # Primary est healthy par défaut
         with pytest.raises(FailoverError, match="still healthy"):
             await cluster_failover_manager.trigger_failover("Unnecessary failover")
 
     @pytest.mark.asyncio
-    async def test_failover_already_in_progress_fails(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_failover_already_in_progress_fails(self, cluster_failover_manager, mock_audit_emitter):
         """Failover concurrent échoue."""
         cluster_failover_manager._failover_in_progress = True
 
@@ -371,15 +351,11 @@ class TestFailoverErrors:
             await cluster_failover_manager.trigger_failover("Concurrent failover")
 
     @pytest.mark.asyncio
-    async def test_failover_all_standbys_unhealthy_fails(
-        self, cluster_failover_manager, mock_audit_emitter
-    ):
+    async def test_failover_all_standbys_unhealthy_fails(self, cluster_failover_manager, mock_audit_emitter):
         """Failover quand tous standbys unhealthy échoue."""
         # Primary défaillant
         cluster_failover_manager._nodes["node-1"].status = HealthStatus.UNHEALTHY
-        cluster_failover_manager._nodes["node-1"].last_heartbeat = (
-            datetime.now() - timedelta(seconds=10)
-        )
+        cluster_failover_manager._nodes["node-1"].last_heartbeat = datetime.now() - timedelta(seconds=10)
         # Standbys défaillants
         cluster_failover_manager._nodes["node-2"].status = HealthStatus.UNHEALTHY
         cluster_failover_manager._nodes["node-3"].status = HealthStatus.UNHEALTHY
@@ -391,6 +367,7 @@ class TestFailoverErrors:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS CLUSTER STATUS
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestClusterStatus:
     """Tests status cluster."""
@@ -415,9 +392,7 @@ class TestClusterStatus:
 
     def test_cluster_status_stale_heartbeat_unhealthy(self, cluster_failover_manager):
         """Heartbeat périmé → noeud unhealthy."""
-        cluster_failover_manager._nodes["node-3"].last_heartbeat = (
-            datetime.now() - timedelta(seconds=60)
-        )
+        cluster_failover_manager._nodes["node-3"].last_heartbeat = datetime.now() - timedelta(seconds=60)
 
         status = cluster_failover_manager.get_cluster_status()
 
@@ -441,6 +416,7 @@ class TestClusterStatus:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS DATA CLASSES
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestNodeInfo:
     """Tests NodeInfo dataclass."""
@@ -474,6 +450,7 @@ class TestNodeInfo:
 # ══════════════════════════════════════════════════════════════════════════════
 # TESTS PROPRIÉTÉS
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestProperties:
     """Tests propriétés du manager."""

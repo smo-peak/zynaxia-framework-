@@ -12,6 +12,7 @@ Invariants:
         - Nouvelles configs: Cache local uniquement
     RUN_053: Cache config TTL 7 jours max
 """
+
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
@@ -23,6 +24,7 @@ from src.licensing.interfaces import ILicenseCache
 
 class DegradedModeError(Exception):
     """Erreur du contrôleur de mode dégradé."""
+
     pass
 
 
@@ -100,11 +102,13 @@ class DegradedModeController(IDegradedModeController):
 
         # Note: L'émission d'audit est synchrone car on ne peut pas
         # await dans une méthode non-async. L'événement sera mis en queue.
-        self.queue_event_for_sync({
-            "type": "degraded_mode_entered",
-            "reason": reason,
-            "timestamp": self._degraded_since.isoformat(),
-        })
+        self.queue_event_for_sync(
+            {
+                "type": "degraded_mode_entered",
+                "reason": reason,
+                "timestamp": self._degraded_since.isoformat(),
+            }
+        )
 
     def exit_degraded_mode(self) -> None:
         """
@@ -116,20 +120,18 @@ class DegradedModeController(IDegradedModeController):
             return  # Pas en mode dégradé
 
         exit_timestamp = datetime.now()
-        duration_seconds = (
-            (exit_timestamp - self._degraded_since).total_seconds()
-            if self._degraded_since
-            else 0
-        )
+        duration_seconds = (exit_timestamp - self._degraded_since).total_seconds() if self._degraded_since else 0
 
         # Enregistrer l'événement de sortie
-        self.queue_event_for_sync({
-            "type": "degraded_mode_exited",
-            "entered_at": self._degraded_since.isoformat() if self._degraded_since else None,
-            "exited_at": exit_timestamp.isoformat(),
-            "duration_seconds": duration_seconds,
-            "events_queued": len(self._event_queue),
-        })
+        self.queue_event_for_sync(
+            {
+                "type": "degraded_mode_exited",
+                "entered_at": self._degraded_since.isoformat() if self._degraded_since else None,
+                "exited_at": exit_timestamp.isoformat(),
+                "duration_seconds": duration_seconds,
+                "events_queued": len(self._event_queue),
+            }
+        )
 
         self._is_degraded = False
         self._degraded_since = None
@@ -325,9 +327,7 @@ class DegradedModeController(IDegradedModeController):
         """
         return {
             "is_degraded": self._is_degraded,
-            "degraded_since": (
-                self._degraded_since.isoformat() if self._degraded_since else None
-            ),
+            "degraded_since": (self._degraded_since.isoformat() if self._degraded_since else None),
             "degraded_duration_seconds": self.get_degraded_duration_seconds(),
             "reason": self._reason,
             "available_features": self.get_available_features(),

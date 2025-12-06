@@ -6,14 +6,15 @@ Invariants couverts:
 - RUN_042 (Immutabilité logs)
 - RUN_044 (Signature cryptographique)
 """
+
 from .interfaces import (
-    IAuditEmitter, 
-    IBlockchainAnchor, 
-    IAuditValidator, 
-    IAuditQuery, 
-    AuditEvent, 
+    IAuditEmitter,
+    IBlockchainAnchor,
+    IAuditValidator,
+    IAuditQuery,
+    AuditEvent,
     AnchorReceipt,
-    AuditEventType
+    AuditEventType,
 )
 from .audit_emitter import AuditEmitter, AuditEmitterError
 from .blockchain_anchor import BlockchainAnchor, BlockchainAnchorError

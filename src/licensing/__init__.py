@@ -14,6 +14,7 @@ Invariants couverts:
 - LIC_090-094 (Audit)
 - LIC_100-104 (Anti-fraude)
 """
+
 from .interfaces import (
     ILicenseManager,
     ILicenseCache,
@@ -22,23 +23,18 @@ from .interfaces import (
     LicenseConfig,
     License,
     ValidationResult,
-    Signature
+    Signature,
 )
 from .license_manager import LicenseManager, LicenseManagerError
 from .license_cache import LicenseCache, LicenseCacheError
 from .kill_switch_controller import KillSwitchController, KillSwitchError
 from .module_gate import ModuleGate, ModuleAccessDeniedError
-from .license_alert_service import (
-    LicenseAlertService,
-    AlertLevel,
-    AlertChannel,
-    AlertConfig
-)
+from .license_alert_service import LicenseAlertService, AlertLevel, AlertChannel, AlertConfig
 
 __all__ = [
     # Interfaces
     "ILicenseManager",
-    "ILicenseCache", 
+    "ILicenseCache",
     "IKillSwitchController",
     "IModuleGate",
     # Data classes
@@ -52,7 +48,7 @@ __all__ = [
     "AlertChannel",
     # Implementations
     "LicenseManager",
-    "LicenseCache", 
+    "LicenseCache",
     "KillSwitchController",
     "ModuleGate",
     "LicenseAlertService",
