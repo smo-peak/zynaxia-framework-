@@ -7,6 +7,7 @@ Module de déploiement sécurisé avec:
 - Scan CVE obligatoire (DEPL_004-005)
 - Orchestration zero-downtime (DEPL_010-014)
 - Déploiement de configuration sécurisé (DEPL_020-024)
+- Contraintes de déploiement (DEPL_030-033)
 
 Invariants couverts:
 - DEPL_001: Images Docker signées obligatoirement
@@ -24,6 +25,10 @@ Invariants couverts:
 - DEPL_022: Config ancrée blockchain AVANT déploiement
 - DEPL_023: Hash config vérifié sur chaque nœud après réception
 - DEPL_024: Ancienne config archivée (JAMAIS supprimée)
+- DEPL_030: Déploiement OTA respecte fenêtre maintenance (WARNING)
+- DEPL_031: Déploiement BLOQUÉ si licence invalide
+- DEPL_032: Déploiement BLOQUÉ si cluster non-healthy
+- DEPL_033: Notification Fleet Manager AVANT et APRÈS déploiement
 """
 
 from .interfaces import (
@@ -58,6 +63,17 @@ from .config_deployer import (
     ConfigHashMismatchError,
     ConfigVersion,
 )
+from .deployment_constraints import (
+    DeploymentConstraints,
+    DeploymentConstraintsError,
+    LicenseInvalidError,
+    ClusterUnhealthyError,
+    FleetNotificationError,
+    MaintenanceWindow,
+    DeploymentPrecheck,
+    IFleetNotifier,
+    DeploymentEventType,
+)
 
 __all__ = [
     # Enums
@@ -65,6 +81,7 @@ __all__ = [
     "VerificationStatus",
     "DeploymentState",
     "NodeRole",
+    "DeploymentEventType",
     # Data classes
     "ImageSignature",
     "CVEResult",
@@ -72,14 +89,18 @@ __all__ = [
     "DeploymentConfig",
     "DeploymentResult",
     "ConfigVersion",
+    "MaintenanceWindow",
+    "DeploymentPrecheck",
     # Interfaces
     "IImageVerifier",
     "IDeploymentOrchestrator",
     "IConfigDeployer",
+    "IFleetNotifier",
     # Implementations
     "ImageVerifier",
     "DeploymentOrchestrator",
     "ConfigDeployer",
+    "DeploymentConstraints",
     # Exceptions
     "ImageVerifierError",
     "DeploymentError",
@@ -89,4 +110,8 @@ __all__ = [
     "QuorumNotReachedError",
     "BlockchainAnchorError",
     "ConfigHashMismatchError",
+    "DeploymentConstraintsError",
+    "LicenseInvalidError",
+    "ClusterUnhealthyError",
+    "FleetNotificationError",
 ]
